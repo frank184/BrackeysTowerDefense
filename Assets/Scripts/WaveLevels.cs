@@ -4,31 +4,51 @@ using UnityEngine.UI;
 [RequireComponent(typeof(WaveSpawner))]
 public class WaveLevels : MonoBehaviour {
     [SerializeField]
+    private Text timeText;
+    [SerializeField]
     private Text waveText;
 
     private WaveSpawner waveSpawner;
 
+    public EnemyBlueprint enemyBlueprint;
+
     private float counter;
-    public int waveLevel = 1;
+    public int waveLevel = 0;
+
+    private bool startCounting = false;
 
     private void Start()
     {
         waveSpawner = GetComponent<WaveSpawner>();
-        waveSpawner.OnWaveSpawn += IncrementLevel;
+        waveSpawner.OnWaveSpawn += SetupNextWave;
         counter = waveSpawner.waveTimer;
-        InvokeRepeating("WaveCount", waveSpawner.waveDelay, 1);
+        Invoke("StartCounting", waveSpawner.waveDelay);
+        waveText.text = "Wave " + waveLevel;
     }
 
-    private void WaveCount()
+    private void Update()
     {
-        waveText.text = Mathf.Ceil(counter).ToString();
-        counter -= 1;
+        if (startCounting)
+        {
+            timeText.text = string.Format("{00:00.00}", counter);
+            counter -= Time.deltaTime;
+        }
     }
 
-    void IncrementLevel()
+    void SetupNextWave()
     {
-        Debug.Log("WAVE " + waveLevel + " INCOMING!");
-        waveSpawner.enemyPerWave = ++waveLevel;
+        waveLevel += 1;
+        waveText.text = "Wave " + waveLevel;
         counter = waveSpawner.waveTimer;
+        waveSpawner.SetEnemyBlueprint(enemyBlueprint);
+        waveSpawner.enemyPerWave += 1;
+        counter = waveSpawner.waveTimer;
+        enemyBlueprint.speed += 0.1f;
+        enemyBlueprint.health += 0.2f;
+    }
+
+    private void StartCounting()
+    {
+        startCounting = true;
     }
 }

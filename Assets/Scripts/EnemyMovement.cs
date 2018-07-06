@@ -18,7 +18,13 @@ public class EnemyMovement : MonoBehaviour {
         {
             if (wavepointIndex < Waypoints.waypoints.Length)
                 target = Waypoints.waypoints[wavepointIndex++];
-            else Destroy(gameObject);
+            else EndPath();
         }
+    }
+
+    void EndPath()
+    {
+        Player.Lives -= 1;
+        Destroy(gameObject);
     }
 }

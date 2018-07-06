@@ -11,6 +11,8 @@ public class Turret : MonoBehaviour {
 
     [Header("Setup")]
     [SerializeField]
+    private GameObject muzzleFlashPrefab;
+    [SerializeField]
     private GameObject bulletPrefab;
     [SerializeField]
     private Transform firePoint;
@@ -32,24 +34,42 @@ public class Turret : MonoBehaviour {
             Quaternion lookRotation = Quaternion.LookRotation(direction);
             Quaternion smoothRotation = Quaternion.Lerp(pivot.rotation, lookRotation, Time.deltaTime * turnSpeed);
             Vector3 rotation = smoothRotation.eulerAngles;
-            pivot.rotation = Quaternion.Euler(0f, rotation.y, 0f);
-            //pivot.transform.LookAt(target);
+            pivot.rotation = Quaternion.Euler(rotation);
             if (fireCountdown <= 0f)
             {
-                Shoot();
                 fireCountdown = 1f / fireRate;
+                Shoot();
             }
-
             fireCountdown -= Time.deltaTime;
         }
     }
 
     void Shoot()
     {
-        GameObject obj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        Bullet bullet = obj.GetComponent<Bullet>();
-        if (bullet != null)
-            bullet.Seek(target);
+        if (bulletPrefab != null)
+        {
+            GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            Bullet bullet = bulletObj.GetComponent<Bullet>();
+            if (bullet != null) bullet.Seek(target);
+            if (muzzleFlashPrefab != null)
+            {
+                GameObject muzzleFlashObj = Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint);
+                Destroy(muzzleFlashObj, 10f);
+            }
+        }
+        else
+        {
+            RaycastHit hit;
+            bool hitSomething = Physics.Raycast(firePoint.position, firePoint.forward, out hit, range);
+            if (hitSomething && hit.collider.tag == enemyTag)
+            {
+                if (muzzleFlashPrefab != null)
+                {
+                    GameObject muzzleFlashObj = Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint);
+                    Destroy(muzzleFlashObj, 1f);
+                }
+            }
+        }
     }
 
     void UpdateTarget()
@@ -67,13 +87,12 @@ public class Turret : MonoBehaviour {
                 nearestEnemy = enemy;
             }
         }
-        //if (nearestEnemy != null && shortestDistance <= range && target == null)
         if (nearestEnemy != null && shortestDistance <= range)
             target = nearestEnemy.transform;
         else target = null;
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, range);

@@ -6,6 +6,6 @@ public class MoneyUI : MonoBehaviour {
 
     private void Update()
     {
-        GetComponent<Text>().text = "$" + Player.Money;
+        GetComponent<Text>().text = string.Format("${0:F0}", Player.Money);
     }
 }

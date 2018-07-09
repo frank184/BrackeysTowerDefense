@@ -34,7 +34,7 @@ public class BuildManager : MonoBehaviour {
         if (Player.Money >= turretBlueprint.cost)
         {
             Vector3 position = node.transform.position;
-            position.y = turretBlueprint.prefab.transform.position.y;
+            position.y = 0.5f;
             node.turret = Instantiate(turretBlueprint.prefab, position, Quaternion.identity);
             Player.Money -= turretBlueprint.cost;
             Destroy(Instantiate(buildEffectPrefab, position, Quaternion.identity, node.turret.transform), 15f);

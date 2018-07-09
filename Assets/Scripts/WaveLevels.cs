@@ -32,6 +32,7 @@ public class WaveLevels : MonoBehaviour {
         {
             timeText.text = string.Format("{00:00.00}", counter);
             counter -= Time.deltaTime;
+            Player.Money += Time.deltaTime * 5f;
         }
     }
 

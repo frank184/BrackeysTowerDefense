@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class EnemyMovement : MonoBehaviour {
     public float speed = 10f;
@@ -12,6 +13,14 @@ public class EnemyMovement : MonoBehaviour {
 
     private void Update()
     {
+        // Rotation
+        Vector3 direction = target.position - transform.transform.position;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        Quaternion smoothRotation = Quaternion.Lerp(transform.rotation, lookRotation, Time.deltaTime * speed);
+        Vector3 rotation = smoothRotation.eulerAngles;
+        transform.rotation = Quaternion.Euler(rotation);
+
+        // Direction
         Vector3 waypointDirection = target.position - transform.position;
         transform.Translate(waypointDirection.normalized * speed * Time.deltaTime, Space.World);
         if (Vector3.Distance(target.position, transform.position) <= 0.4f)
@@ -20,6 +29,22 @@ public class EnemyMovement : MonoBehaviour {
                 target = Waypoints.waypoints[wavepointIndex++];
             else EndPath();
         }
+    }
+
+    public void SlowMovement(float reduceMovementSpeed, float reduceMovementTime)
+    {
+        StartCoroutine(Slow(reduceMovementSpeed, reduceMovementTime));
+    }
+
+    IEnumerator Slow(float reduceMovementSpeed, float reduceMovementTime)
+    {
+        float startSpeed = speed;
+        Debug.Log("start enemy move speed " + startSpeed);
+        speed /= reduceMovementSpeed;
+        Debug.Log("new enemy move speed " + speed);
+        yield return new WaitForSeconds(reduceMovementTime);
+        speed = startSpeed;
+        Debug.Log("reset enemy move speed " + speed);
     }
 
     void EndPath()

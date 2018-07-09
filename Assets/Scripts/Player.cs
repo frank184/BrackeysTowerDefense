@@ -4,8 +4,8 @@ public class Player : MonoBehaviour {
     public static int Lives;
     private int startLives = 20;
 
-    public static int Money;
-    private int startMoney = 400;
+    public static float Money;
+    private int startMoney = 800;
 
     private void Start()
     {

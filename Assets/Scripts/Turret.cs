@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class Turret : MonoBehaviour {
     private Transform target;
@@ -12,8 +13,9 @@ public class Turret : MonoBehaviour {
     [Header("Setup")]
     [SerializeField]
     private GameObject muzzleFlashPrefab;
-    [SerializeField]
-    private GameObject bulletPrefab;
+
+    public GameObject bulletPrefab;
+
     [SerializeField]
     private Transform firePoint;
     [SerializeField]
@@ -30,11 +32,7 @@ public class Turret : MonoBehaviour {
     {
         if (target != null)
         {
-            Vector3 direction = target.position - pivot.transform.position;
-            Quaternion lookRotation = Quaternion.LookRotation(direction);
-            Quaternion smoothRotation = Quaternion.Lerp(pivot.rotation, lookRotation, Time.deltaTime * turnSpeed);
-            Vector3 rotation = smoothRotation.eulerAngles;
-            pivot.rotation = Quaternion.Euler(rotation);
+            LockOn();
             if (fireCountdown <= 0f)
             {
                 fireCountdown = 1f / fireRate;
@@ -44,31 +42,41 @@ public class Turret : MonoBehaviour {
         }
     }
 
+    void LockOn()
+    {
+        Vector3 direction = target.position - pivot.transform.position;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        Quaternion smoothRotation = Quaternion.Lerp(pivot.rotation, lookRotation, Time.deltaTime * turnSpeed);
+        Vector3 rotation = smoothRotation.eulerAngles;
+        pivot.rotation = Quaternion.Euler(rotation);
+    }
+
     void Shoot()
     {
-        if (bulletPrefab != null)
+        // Instantiate Obj from Prefab
+        GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Bullet bullet = bulletObj.GetComponent<Bullet>();
+
+        // Bullet Flows 
+        if (bullet.GetType() == typeof(BulletProjectile))
         {
-            GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-            Bullet bullet = bulletObj.GetComponent<Bullet>();
-            if (bullet != null) bullet.Seek(target);
-            if (muzzleFlashPrefab != null)
-            {
-                GameObject muzzleFlashObj = Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint);
-                Destroy(muzzleFlashObj, 10f);
-            }
+            BulletProjectile bulletProjectile = (BulletProjectile)bullet;
+            bulletProjectile.Seek(target);
         }
-        else
+        else if (bullet.GetType() == typeof(BulletLaser))
         {
-            RaycastHit hit;
-            bool hitSomething = Physics.Raycast(firePoint.position, firePoint.forward, out hit, range);
-            if (hitSomething && hit.collider.tag == enemyTag)
-            {
-                if (muzzleFlashPrefab != null)
-                {
-                    GameObject muzzleFlashObj = Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint);
-                    Destroy(muzzleFlashObj, 1f);
-                }
-            }
+            BulletLaser bulletLaser = (BulletLaser)bullet;
+            bulletLaser.Beam(target);
+        }
+        else if (bullet.GetType() == typeof(BulletParticle))
+        {
+            bulletObj.transform.SetParent(firePoint);
+            Destroy(bulletObj, 1f);
+        }
+
+        if (muzzleFlashPrefab != null)
+        {
+            Destroy(Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint), 10f);
         }
     }
 

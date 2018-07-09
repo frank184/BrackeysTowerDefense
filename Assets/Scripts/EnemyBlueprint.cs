@@ -6,4 +6,5 @@ public class EnemyBlueprint {
     public float speed = 0;
     public float health = 0;
     public int reward = 0;
+    public float turnSpeed = 10f;
 }

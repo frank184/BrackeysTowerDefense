@@ -40,5 +40,4 @@ public class BuildManager : MonoBehaviour {
             Destroy(Instantiate(buildEffectPrefab, position, Quaternion.identity, node.turret.transform), 15f);
         }
     }
-
 }

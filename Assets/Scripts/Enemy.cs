@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 
 public class Enemy : MonoBehaviour {
-    public int scale;
+    public static string LAYER = "Enemy";
 
+    public int scale;
     public float health = 100;
     public int reward = 10;
 

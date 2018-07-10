@@ -39,9 +39,7 @@ public class EnemyMovement : MonoBehaviour {
     IEnumerator Slow(float reduceMovementSpeed, float reduceMovementTime)
     {
         float startSpeed = speed;
-        Debug.Log("start enemy move speed " + startSpeed);
         speed /= reduceMovementSpeed;
-        Debug.Log("new enemy move speed " + speed);
         yield return new WaitForSeconds(reduceMovementTime);
         speed = startSpeed;
         Debug.Log("reset enemy move speed " + speed);

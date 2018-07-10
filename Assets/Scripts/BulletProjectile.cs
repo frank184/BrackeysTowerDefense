@@ -24,7 +24,6 @@ public class BulletProjectile : Bullet {
 
     private void Update()
     {
-        Debug.Log(target);
         if (target != null)
         {
             targetLastKnown = target.position;
@@ -52,7 +51,7 @@ public class BulletProjectile : Bullet {
     {
         if (hitPrefab != null)
         {
-            GameObject hitEffect = Instantiate(hitPrefab, target.position, target.rotation);
+            GameObject hitEffect = Instantiate(hitPrefab, target != null ? target.position : targetLastKnown, Quaternion.identity);
             Destroy(hitEffect, 2f);
         }
         if (explosionRadius > 0f)

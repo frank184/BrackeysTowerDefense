@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 public class Turret : MonoBehaviour {
     private Transform target;
@@ -54,30 +53,33 @@ public class Turret : MonoBehaviour {
     void Shoot()
     {
         // Instantiate Obj from Prefab
-        GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        Bullet bullet = bulletObj.GetComponent<Bullet>();
+        Bullet bullet = bulletPrefab.GetComponent<Bullet>();
 
-        // Bullet Flows 
+        // Bullet Flow
         if (bullet.GetType() == typeof(BulletProjectile))
         {
-            BulletProjectile bulletProjectile = (BulletProjectile)bullet;
+            GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            BulletProjectile bulletProjectile = bulletObj.GetComponent<BulletProjectile>();
             bulletProjectile.Seek(target);
         }
         else if (bullet.GetType() == typeof(BulletLaser))
         {
-            BulletLaser bulletLaser = (BulletLaser)bullet;
+            Debug.Log("Did Hit");
+            BulletLaser bulletLaser = (BulletLaser)bulletPrefab.GetComponent<Bullet>();
             bulletLaser.Beam(target);
+            Enemy enemy = target.GetComponent<Enemy>();
+            enemy.TakeDamage(bulletLaser.damage);
         }
         else if (bullet.GetType() == typeof(BulletParticle))
         {
-            bulletObj.transform.SetParent(firePoint);
-            Destroy(bulletObj, 1f);
+            GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation, firePoint);
+            BulletParticle bulletParticle = bulletObj.GetComponent<BulletParticle>();
+            bulletParticle.Spawn();
         }
 
+        // If muzzle flash
         if (muzzleFlashPrefab != null)
-        {
-            Destroy(Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint), 10f);
-        }
+            Destroy(Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint), 5);
     }
 
     void UpdateTarget()
